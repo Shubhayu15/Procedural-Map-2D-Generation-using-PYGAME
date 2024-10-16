@@ -1,0 +1,63 @@
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Grid settings
+CELL_SIZE = 22  # Size of each cell
+GRID_WIDTH = 32
+GRID_HEIGHT = 32
+WINDOW_WIDTH = GRID_WIDTH * CELL_SIZE
+WINDOW_HEIGHT = GRID_HEIGHT * CELL_SIZE
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (55, 255, 0)
+
+# Create a Pygame window
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption("64x64 Modifiable Grid")
+
+# Create the grid
+grid = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+
+def draw_grid():
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            color = WHITE if grid[row][col] == 0 else GREEN
+            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, BLACK, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE), 1)
+
+def get_grid_position(mouse_pos):
+    x, y = mouse_pos
+    col = x // CELL_SIZE
+    row = y // CELL_SIZE
+    return row, col
+
+def modify_grid(pos):
+    row, col = pos
+    if grid[row][col] == 0:
+        grid[row][col] = 1  # Change the color
+    else:
+        grid[row][col] = 0  # Reset the cell
+
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            grid_pos = get_grid_position(mouse_pos)
+            modify_grid(grid_pos)
+
+    # Draw the grid
+    screen.fill(BLACK)
+    draw_grid()
+    pygame.display.flip()
+
+pygame.quit()
