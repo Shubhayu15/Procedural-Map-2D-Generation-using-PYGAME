@@ -1,0 +1,154 @@
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Grid settings
+CELL_SIZE = 22  # Size of each cell
+GRID_WIDTH = 33
+GRID_HEIGHT = 33
+WINDOW_WIDTH = GRID_WIDTH * CELL_SIZE + 200  # Added space for panel on the right
+WINDOW_HEIGHT = GRID_HEIGHT * CELL_SIZE
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (55, 255, 0)
+GRAY = (200, 200, 200)
+BLUE = (0, 100, 255)
+
+# Create a Pygame window
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption("Maze with Loop Routes")
+
+# Fonts and UI elements
+font = pygame.font.Font(None, 36)
+small_font = pygame.font.Font(None, 28)
+
+# Create the grid
+grid = [[1 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]  # Start with all walls
+
+# Initial seed and input text
+seed_text = ""
+current_seed = None
+
+# Define directions for maze generation
+DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+# Helper function to draw text
+def draw_text(text, font, color, surface, x, y):
+    text_obj = font.render(text, True, color)
+    text_rect = text_obj.get_rect(topleft=(x, y))
+    surface.blit(text_obj, text_rect)
+
+# Draw the grid
+def draw_grid():
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            color = WHITE if grid[row][col] == 0 else GREEN
+            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, BLACK, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE), 1)
+
+# Function to modify the grid
+def modify_grid(pos):
+    row, col = pos
+    if grid[row][col] == 1:  # If it's a wall, change to path
+        grid[row][col] = 0
+    elif grid[row][col] == 0:  # If it's a path, change to wall
+        grid[row][col] = 1
+
+# Randomly generate the maze using Recursive Backtracking
+def generate_maze(x, y):
+    grid[y][x] = 0  # Mark the current cell as a path
+
+    # Randomize the order of directions
+    random.shuffle(DIRECTIONS)
+
+    for direction in DIRECTIONS:
+        nx, ny = x + direction[0] * 2, y + direction[1] * 2
+
+        if 0 < nx < GRID_WIDTH and 0 < ny < GRID_HEIGHT and grid[ny][nx] == 1:
+            grid[y + direction[1]][x + direction[0]] = 0  # Remove wall between cells
+            generate_maze(nx, ny)  # Recursively generate from the new cell
+
+# Random dungeon generation with a maze
+def generate_dungeon(seed):
+    random.seed(seed)
+
+    # Clear grid
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            grid[row][col] = 1  # Fill everything with walls (green)
+
+    # Create the 1-block boundary
+    for row in range(GRID_HEIGHT):
+        grid[row][0] = 1  # Left boundary
+        grid[row][GRID_WIDTH - 1] = 1  # Right boundary
+    for col in range(GRID_WIDTH):
+        grid[0][col] = 1  # Top boundary
+        grid[GRID_HEIGHT - 1][col] = 1  # Bottom boundary
+
+    # Add walls on the rightmost column and bottom row
+    for row in range(GRID_HEIGHT):
+        grid[row][GRID_WIDTH - 1] = 1  # Right boundary wall
+    for col in range(GRID_WIDTH):
+        grid[GRID_HEIGHT - 1][col] = 1  # Bottom boundary wall
+
+    # Start maze generation from a random cell
+    start_x = random.randrange(1, GRID_WIDTH - 1, 2)
+    start_y = random.randrange(1, GRID_HEIGHT - 1, 2)
+    generate_maze(start_x, start_y)
+
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            sys.exit()
+        
+        # Mouse click to modify grid
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            grid_pos = (mouse_pos[1] // CELL_SIZE, mouse_pos[0] // CELL_SIZE)
+            if grid_pos[0] < GRID_HEIGHT and grid_pos[1] < GRID_WIDTH:
+                modify_grid(grid_pos)
+        
+        # Key press for text input
+        elif event.type == pygame.KEYDOWN:
+            if event.unicode.isdigit():
+                seed_text += event.unicode
+            elif event.key == pygame.K_BACKSPACE:
+                seed_text = seed_text[:-1]
+            elif event.key == pygame.K_RETURN:
+                if seed_text.isdigit():
+                    current_seed = int(seed_text)
+                    generate_dungeon(current_seed)
+            elif event.key == pygame.K_r:  # Randomize the seed
+                current_seed = random.randint(0, 9999)
+                seed_text = str(current_seed)
+                generate_dungeon(current_seed)
+            elif event.key == pygame.K_c:  # Clear/reset the grid
+                seed_text = ""
+                current_seed = None
+                grid = [[1 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]  # Reset to walls
+
+    # Draw the grid
+    screen.fill(GRAY)
+    draw_grid()
+
+    # Panel UI
+    pygame.draw.rect(screen, BLUE, (GRID_WIDTH * CELL_SIZE, 0, 200, WINDOW_HEIGHT))  # Right panel background
+    draw_text("Seed:", font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 10)
+    pygame.draw.rect(screen, WHITE, (GRID_WIDTH * CELL_SIZE + 10, 50, 180, 40))
+    draw_text(seed_text, small_font, BLACK, screen, GRID_WIDTH * CELL_SIZE + 15, 55)
+    
+    draw_text("Enter to Generate", small_font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 110)
+    draw_text("R for Random Seed", small_font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 150)
+    draw_text("C to Reset", small_font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 190)
+
+    pygame.display.flip()
+
+pygame.quit()
