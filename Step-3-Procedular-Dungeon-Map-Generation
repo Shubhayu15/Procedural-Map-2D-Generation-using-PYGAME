@@ -1,0 +1,204 @@
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Grid settings
+CELL_SIZE = 22  # Size of each cell
+GRID_WIDTH = 32
+GRID_HEIGHT = 32
+WINDOW_WIDTH = GRID_WIDTH * CELL_SIZE + 200  # Added space for panel on the right
+WINDOW_HEIGHT = GRID_HEIGHT * CELL_SIZE
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (55, 255, 0)
+GRAY = (200, 200, 200)
+BLUE = (0, 100, 255)
+
+# Create a Pygame window
+screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption("Dungeon-Like Grid with Small Rooms and Maze")
+
+# Fonts and UI elements
+font = pygame.font.Font(None, 36)
+small_font = pygame.font.Font(None, 28)
+
+# Create the grid
+grid = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+
+# Initial seed and input text
+seed_text = ""
+current_seed = None
+
+# Room generation parameters for smaller rooms
+ROOM_MIN_SIZE = 3
+ROOM_MAX_SIZE = 4
+MAX_ROOMS = random.randint(8, 10)  # Random number of rooms between 8 and 10
+
+# Helper function to draw text
+def draw_text(text, font, color, surface, x, y):
+    text_obj = font.render(text, True, color)
+    text_rect = text_obj.get_rect(topleft=(x, y))
+    surface.blit(text_obj, text_rect)
+
+# Draw the grid
+def draw_grid():
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            color = WHITE if grid[row][col] == 0 else GREEN
+            pygame.draw.rect(screen, color, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, BLACK, (col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE), 1)
+
+# Get grid position from mouse
+def get_grid_position(mouse_pos):
+    x, y = mouse_pos
+    if x < GRID_WIDTH * CELL_SIZE:  # Ensure it's within the grid area
+        col = x // CELL_SIZE
+        row = y // CELL_SIZE
+        return row, col
+    return None
+
+# Modify the grid
+def modify_grid(pos):
+    row, col = pos
+    if grid[row][col] == 0:
+        grid[row][col] = 1  # Change the cell to a wall (green)
+    else:
+        grid[row][col] = 0  # Change the cell to a path (white)
+
+# Helper function to create rooms
+def create_room(x, y, width, height):
+    for i in range(y, y + height):
+        for j in range(x, x + width):
+            grid[i][j] = 0  # Empty space (path)
+
+# Randomly place rooms
+def place_rooms():
+    rooms = []
+    for _ in range(MAX_ROOMS):
+        w = random.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
+        h = random.randint(ROOM_MIN_SIZE, ROOM_MAX_SIZE)
+        x = random.randint(1, GRID_WIDTH - w - 1)
+        y = random.randint(1, GRID_HEIGHT - h - 1)
+
+        # Check for room overlap
+        new_room = (x, y, w, h)
+        overlap = False
+        for other_room in rooms:
+            if (x < other_room[0] + other_room[2] and x + w > other_room[0] and
+                y < other_room[1] + other_room[3] and y + h > other_room[1]):
+                overlap = True
+                break
+
+        if not overlap:
+            create_room(x, y, w, h)
+            rooms.append(new_room)
+    
+    return rooms
+
+# Create corridors between rooms
+def connect_rooms(rooms):
+    for i in range(1, len(rooms)):
+        prev_room = rooms[i - 1]
+        curr_room = rooms[i]
+
+        # Get the center of each room
+        prev_center_x = prev_room[0] + prev_room[2] // 2
+        prev_center_y = prev_room[1] + prev_room[3] // 2
+        curr_center_x = curr_room[0] + curr_room[2] // 2
+        curr_center_y = curr_room[1] + curr_room[3] // 2
+
+        # Randomly choose to go horizontally then vertically, or vice versa
+        if random.choice([True, False]):
+            create_h_corridor(prev_center_x, curr_center_x, prev_center_y)
+            create_v_corridor(prev_center_y, curr_center_y, curr_center_x)
+        else:
+            create_v_corridor(prev_center_y, curr_center_y, prev_center_x)
+            create_h_corridor(prev_center_x, curr_center_x, curr_center_y)
+
+# Create horizontal corridor
+def create_h_corridor(x1, x2, y):
+    for x in range(min(x1, x2), max(x1, x2) + 1):
+        grid[y][x] = 0  # Path
+
+# Create vertical corridor
+def create_v_corridor(y1, y2, x):
+    for y in range(min(y1, y2), max(y1, y2) + 1):
+        grid[y][x] = 0  # Path
+
+# Random dungeon generation with rooms and corridors
+def generate_dungeon(seed):
+    random.seed(seed)
+    
+    # Clear grid
+    for row in range(GRID_HEIGHT):
+        for col in range(GRID_WIDTH):
+            grid[row][col] = 1  # Fill everything with walls (green)
+    
+    # Create the 1-block boundary
+    for row in range(GRID_HEIGHT):
+        grid[row][0] = 1  # Left boundary
+        grid[row][GRID_WIDTH - 1] = 1  # Right boundary
+    for col in range(GRID_WIDTH):
+        grid[0][col] = 1  # Top boundary
+        grid[GRID_HEIGHT - 1][col] = 1  # Bottom boundary
+    
+    # Place random rooms and connect them with corridors
+    rooms = place_rooms()
+    connect_rooms(rooms)
+
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            sys.exit()
+        
+        # Mouse click to modify grid
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            grid_pos = get_grid_position(mouse_pos)
+            if grid_pos:
+                modify_grid(grid_pos)
+        
+        # Key press for text input
+        elif event.type == pygame.KEYDOWN:
+            if event.unicode.isdigit():
+                seed_text += event.unicode
+            elif event.key == pygame.K_BACKSPACE:
+                seed_text = seed_text[:-1]
+            elif event.key == pygame.K_RETURN:
+                if seed_text.isdigit():
+                    current_seed = int(seed_text)
+                    generate_dungeon(current_seed)
+            elif event.key == pygame.K_r:  # Randomize the seed
+                current_seed = random.randint(0, 9999)
+                seed_text = str(current_seed)
+                generate_dungeon(current_seed)
+            elif event.key == pygame.K_c:  # Clear/reset the grid
+                seed_text = ""
+                current_seed = None
+                grid = [[0 for _ in range(GRID_WIDTH)] for _ in range(GRID_HEIGHT)]
+
+    # Draw the grid
+    screen.fill(GRAY)
+    draw_grid()
+
+    # Panel UI
+    pygame.draw.rect(screen, BLUE, (GRID_WIDTH * CELL_SIZE, 0, 200, WINDOW_HEIGHT))  # Right panel background
+    draw_text("Seed:", font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 10)
+    pygame.draw.rect(screen, WHITE, (GRID_WIDTH * CELL_SIZE + 10, 50, 180, 40))
+    draw_text(seed_text, small_font, BLACK, screen, GRID_WIDTH * CELL_SIZE + 15, 55)
+    
+    draw_text("Press Enter to Generate", small_font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 110)
+    draw_text("Press R for Random Seed", small_font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 150)
+    draw_text("Press C to Reset", small_font, WHITE, screen, GRID_WIDTH * CELL_SIZE + 10, 190)
+
+    pygame.display.flip()
+
+pygame.quit()
