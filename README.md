@@ -1,5 +1,5 @@
 # 🎮 The Rooms - A Raycasting Maze Game
-![Recording 2024-10-24 215749](https://github.com/user-attachments/assets/deaf6596-2372-42b7-9774-ddd59b87f65b)
+![clip1-min](https://github.com/user-attachments/assets/021a8d4b-61d0-4e74-81eb-9ce8894a910e)
 
 A Python-based dungeon crawler that combines classic maze generation with raycasting technology to create an immersive 3D exploration experience. Create, customize, and explore procedurally generated mazes in first-person view!
 
