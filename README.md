@@ -1,41 +1,114 @@
-# Procedural-Map-2D-Generation-using-PYGAME
+# 🎮 The Rooms - A Raycasting Maze Game
+![Recording 2024-10-24 215749](https://github.com/user-attachments/assets/deaf6596-2372-42b7-9774-ddd59b87f65b)
 
-# Program Description: Maze Generation and Raycasting Game in Pygame
->This Python program, built using the Pygame library, simulates a maze-based raycasting game. The game features procedurally generated mazes, player movement, and a 3D-like raycasting view. It includes a simple user interface for seed-based maze generation and in-game navigation, allowing players to explore a maze environment rendered with 2D raycasting techniques similar to early FPS games like Wolfenstein 3D or Doom.
+A Python-based dungeon crawler that combines classic maze generation with raycasting technology to create an immersive 3D exploration experience. Create, customize, and explore procedurally generated mazes in first-person view!
 
-# Key Features:
-- Maze Generation:
+![GitHub](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.6+-blue)
+![Pygame](https://img.shields.io/badge/pygame-2.0+-yellow)
 
-> A procedural maze generation system using recursive backtracking. The grid is initially filled with walls, and the maze is generated based on a seed input or randomization, creating unique paths and walls for each playthrough.
-> The player can modify the maze manually by clicking on grid cells before starting the game, switching walls and paths.
-- Raycasting Engine:
+<p align="center">
+  <a href="https://github.com/Shubhayu15">
+    <img src="https://img.shields.io/github/followers/Shubhayu15?label=Follow&style=social" alt="GitHub followers">
+  </a>
+  <a href="https://github.com/Shubhayu15/Procedural-Map-2D-Generation-using-PYGAME">
+    <img src="https://img.shields.io/github/stars/Shubhayu15/Procedural-Map-2D-Generation-using-PYGAME?style=social" alt="GitHub stars">
+  </a>
+</p>
 
-> Raycasting is used to render a pseudo-3D perspective of the maze. Rays are cast from the player's position, and based on their distance to the walls, the program simulates depth by adjusting the size and color of wall segments.
-> The program renders the floor and ceiling colors for added visual realism, enhancing the immersive gameplay.
-- Player Movement:
+## ✨ Features
 
-> Players control their character’s movement in the maze using the arrow keys. The movement is constrained by walls, ensuring that the player cannot phase through obstacles.
-> The player can rotate and move forward, backward, left, and right through the maze, and the game responds by updating the raycasting view in real time.
-- Seed-based Maze Customization:
+- **Dual View Modes**
+  - Top-down 2D maze editor
+  - Immersive 3D first-person exploration
+- **Procedural Generation**
+  - Seed-based maze generation
+  - Recursive backtracking algorithm for perfect mazes
+- **Interactive Editor**
+  - Custom maze creation
+  - Real-time wall placement/removal
+- **Raycasting Engine**
+  - Smooth 3D rendering
+  - Distance-based wall shading
+  - Textured floors and ceilings
 
-> Players can input a specific seed value or randomize it using the 'R' key. This seed determines the layout of the maze, enabling consistent results when the same seed is used.
-> A seed text input box allows players to enter numbers, and pressing 'Enter' generates the maze based on that input.
-- User Interface:
+## 🎯 Prerequisites
 
-> The program features a side panel with buttons to start and quit the game. Before starting, players can see and modify the maze grid.
-> During gameplay, an FPS counter is displayed, providing real-time feedback on the game's performance.
-- Collision Detection:
+- Python 3.6 or higher
+- Pygame library
 
-> The program ensures proper collision detection by preventing the player from moving through walls. The player’s position is only updated if the new position corresponds to a valid path in the maze.
+## 🚀 Installation
 
-# Controls:
-- Arrow Keys: Move the player through the maze.
-- Mouse Click: Modify the maze grid before starting the game.
-- Enter: Generate a maze based on the seed input.
-- R: Randomize the seed and generate a new maze.
-- Play/Start Button: Begin exploring the maze with raycasting.
+1. Clone the repository:
+```bash
+git clone https://github.com/Shubhayu15/Procedural-Map-2D-Generation-using-PYGAME.git
+cd Procedural-Map-2D-Generation-using-PYGAME
+```
 
-# Visual Design:
-- Walls: Yellow walls with varying shades depending on their distance from the player.
-- Floor and Roof: Soft yellow floor and light gray roof for added realism.
-- Grid: Green represents walls in the grid view, and white represents paths.
+2. Install required dependencies:
+```bash
+pip install pygame
+```
+
+3. Run the game:
+```bash
+python main.py
+```
+
+## 🎮 How to Play
+
+### Maze Editor Mode
+- **Left Click**: Toggle walls/paths
+- **Enter**: Generate new maze with current seed
+- **R**: Generate maze with random seed
+- **C**: Clear the grid
+- **Play Button**: Switch to 3D exploration mode
+
+### Exploration Mode
+- **W**: Move forward
+- **S**: Move backward
+- **A**: Rotate left
+- **D**: Rotate right
+
+## 🛠️ Technical Details
+![2](https://github.com/user-attachments/assets/276a56f5-6cc3-4d4a-b4ef-ceb320b3f047)
+### Maze Generation
+The game uses a recursive backtracking algorithm to generate perfect mazes, ensuring every location is reachable and there are no loops. Each maze is uniquely determined by its seed, allowing for reproducible layouts.
+![1](https://github.com/user-attachments/assets/e5630893-42ca-47bc-b707-9a1e4dfe7275)
+### Raycasting Engine
+The 3D view is achieved through raycasting, similar to classic games like Wolfenstein 3D:
+- FOV (Field of View): 60 degrees
+- Dynamic wall shading based on distance
+- Optimized ray calculation for smooth performance
+
+## 🎨 Customization
+
+You can modify these constants in the code to customize your experience:
+
+```python
+CELL_SIZE = 22        # Size of grid cells
+GRID_WIDTH = 33       # Maze width
+GRID_HEIGHT = 33      # Maze height
+FOV = math.pi / 3     # Field of view
+MOVE_SPEED = 2        # Player movement speed
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Here are some ways you can contribute:
+1. Report bugs
+2. Suggest new features
+3. Submit pull requests
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- Inspired by classic raycasting games
+- Built with Pygame community resources
+- Special thanks to early testers and contributors
+
+---
+Made with ❤️ by [Shubhayu15](https://github.com/Shubhayu15)
